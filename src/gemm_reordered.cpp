@@ -1,7 +1,8 @@
+
 #include "mlkernels/gemm.hpp"
 
 template<typename T>
-int mlk::naive_gemm(
+int mlk::reordered_gemm(
     const mlk::Matrix<T>& left,
     const mlk::Matrix<T>& right,
     mlk::Matrix<T>& output
@@ -23,11 +24,11 @@ int mlk::naive_gemm(
 
     output.fill(0);
 
-    //Take the dot product of the left row and the right col,
-    //for each value in the output matrix
-    for (j2 = 0; j2 < right.cols(); j2++) 
-        for (i1 = 0; i1 < left.rows(); i1++) 
-            for (j1 = 0; j1 < left.cols(); j1++) 
+    //Reorder the index to perform the computation for the whole
+    //row of the right matrix, then the whole row of the left.
+    for (i1 = 0; i1 < left.rows(); i1++) 
+        for (j1 = 0; j1 < left.cols(); j1++) 
+            for (j2 = 0; j2 < right.cols(); j2++)
                 output(i1, j2) += left(i1, j1) * right(j1, j2);    
     
     return 0;
