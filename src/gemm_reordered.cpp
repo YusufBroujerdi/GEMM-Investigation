@@ -11,7 +11,7 @@ int mlk::reordered_gemm(
     //If i1, i2, i3, correspond to the row of left, right and output resp.
     //and j1, j2, j3, correspond to the col of left, right and output resp.
     //we have j1 = i2, i1 = i3 and j2 = j3
-    long i1, j1, j2;
+    std::size_t i1, j1, j2;
     
     //Check left and right are compatible for multiplication.
     if (left.cols() != right.rows())
@@ -33,3 +33,17 @@ int mlk::reordered_gemm(
     
     return 0;
 }
+
+template
+int mlk::reordered_gemm<float>(
+    const mlk::Matrix<float>& left,
+    const mlk::Matrix<float>& right,
+    mlk::Matrix<float>& output
+);
+
+template
+int mlk::reordered_gemm<double>(
+    const mlk::Matrix<double>& left,
+    const mlk::Matrix<double>& right,
+    mlk::Matrix<double>& output
+);

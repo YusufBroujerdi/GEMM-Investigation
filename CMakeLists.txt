@@ -16,7 +16,17 @@ add_library(mlkernels
 
 target_include_directories(mlkernels
     PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}/include
+        include
+)
+
+add_library(testcases
+    tests/test_cases/gemm_sanity_tests.cpp
+)
+
+target_include_directories(testcases
+    PUBLIC
+        include
+        tests/test_cases/include
 )
 
 add_executable(bench_gemm
@@ -35,6 +45,7 @@ add_executable(test_gemm
 target_link_libraries(test_gemm
     PRIVATE
         mlkernels
+        testcases
 )
 
 enable_testing()

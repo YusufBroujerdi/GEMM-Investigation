@@ -1,3 +1,5 @@
+#pragma once
+
 #include "matrix.hpp"
 
 namespace mlk {
@@ -15,3 +17,9 @@ int reordered_gemm(const Matrix<T>& left,
            );
 
 }
+
+template <typename T>
+using GemmFunctionPtr = int (*)(const mlk::Matrix<T>&,
+                                const mlk::Matrix<T>&,
+                                mlk::Matrix<T>&
+                                );
