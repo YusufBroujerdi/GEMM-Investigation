@@ -4,6 +4,7 @@
 
 #include "mlkernels/gemm.hpp"
 #include "gemm_sanity_tests.hpp"
+#include "gemm_python_tests.hpp"
 
 
 template <typename T>

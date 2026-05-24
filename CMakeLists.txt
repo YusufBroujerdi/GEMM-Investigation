@@ -8,6 +8,29 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 add_compile_options(-Wall -Wextra -Wpedantic)
 
+find_package(Python3 REQUIRED COMPONENTS Interpreter)
+
+message(STATUS "Python executable: ${Python3_EXECUTABLE}")
+
+set(GENERATED_TEST_CASES
+    ${CMAKE_CURRENT_BINARY_DIR}/generated_test_cases
+)
+
+add_custom_command(
+    OUTPUT
+        ${GENERATED_TEST_CASES}/gemm_python_tests.cpp
+        ${GENERATED_TEST_CASES}/include/gemm_python_tests.hpp
+    COMMAND
+        ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/tests/generate_test_cases.py
+        ${GENERATED_TEST_CASES}/gemm_python_tests.cpp
+        ${GENERATED_TEST_CASES}/include/gemm_python_tests.hpp
+    DEPENDS
+        ${CMAKE_CURRENT_SOURCE_DIR}/tests/generate_test_cases.py
+    COMMENT
+        "Generating Python test cases"
+)
+
 add_library(mlkernels
     src/gemm_naive.cpp
     src/gemm_reordered.cpp
@@ -21,12 +44,18 @@ target_include_directories(mlkernels
 
 add_library(testcases
     tests/test_cases/gemm_sanity_tests.cpp
+    ${GENERATED_TEST_CASES}/gemm_python_tests.cpp
 )
 
 target_include_directories(testcases
     PUBLIC
-        include
         tests/test_cases/include
+        ${GENERATED_TEST_CASES}/include
+)
+
+target_link_libraries(testcases
+    PUBLIC
+        mlkernels
 )
 
 add_executable(bench_gemm
