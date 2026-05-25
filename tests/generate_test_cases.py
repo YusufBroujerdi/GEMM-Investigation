@@ -72,7 +72,7 @@ def create_test_case_text(shape, n):
     res += create_matrix_text(test_case['right'], f'right_{n}')
     res += create_matrix_text(test_case['output'], f'output_{n}')
 
-    res += f'mlk::MatrixGemmTestCase<float> test_{n} {{left_{n}, right_{n}, output_{n}, "python_{n}"}};\n\n'
+    res += f'mlk::GemmTestCase<float> test_{n} {{left_{n}, right_{n}, output_{n}, "python_{n}"}};\n\n'
 
     return res
 
@@ -89,7 +89,7 @@ def create_python_tests_src(path):
     for i in range(shape_no):
         res += create_test_case_text(generic_shapes[i], i + 1)
 
-    res += f'std::array<mlk::MatrixGemmTestCase<float>, {shape_no}> tests {{'
+    res += f'std::array<mlk::GemmTestCase<float>, {shape_no}> tests {{'
     res += ''.join([f'test_{i+1}, ' for i in range(shape_no)])
     res = res[:-2]
     res += f'}};\n\n'
@@ -108,7 +108,7 @@ def create_python_tests_header(path):
     res += f'#include <array>\n'
     res += f'#include "mlkernels/matrix.hpp"\n\n'
     res += f'namespace python_sanity_tests {{\n\n'
-    res += f'    extern std::array<mlk::MatrixGemmTestCase<float>, {shape_no}> tests;\n'
+    res += f'    extern std::array<mlk::GemmTestCase<float>, {shape_no}> tests;\n'
     res += f'}}'
 
     with open(path, 'w') as f:

@@ -8,7 +8,7 @@
 
 
 template <typename T>
-int test_gemm_on_constants(const mlk::MatrixGemmTestCase<T>& testcase,
+int test_gemm_on_constants(const mlk::GemmTestCase<T>& testcase,
                            GemmFunctionPtr<T> gemm) {
 
     std::size_t i;

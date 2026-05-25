@@ -23,7 +23,7 @@ mlk::Matrix<float> output_1{1, 1,
     }
 };
 
-mlk::MatrixGemmTestCase<float> test_1 {left_1, right_1, output_1, "sanity_1"};
+mlk::GemmTestCase<float> test_1 {left_1, right_1, output_1, "sanity_1"};
 
 mlk::Matrix<float> left_2{2, 2,
     {
@@ -46,7 +46,7 @@ mlk::Matrix<float> output_2{2, 3,
     }
 };
 
-mlk::MatrixGemmTestCase<float> test_2 {left_2, right_2, output_2, "sanity_2"};
+mlk::GemmTestCase<float> test_2 {left_2, right_2, output_2, "sanity_2"};
 
 mlk::Matrix<float> left_3{3, 5,
     {
@@ -74,8 +74,8 @@ mlk::Matrix<float> output_3{3, 3,
     }
 };
 
-mlk::MatrixGemmTestCase<float> test_3 {left_3, right_3, output_3, "sanity_3"};
+mlk::GemmTestCase<float> test_3 {left_3, right_3, output_3, "sanity_3"};
 
-std::array<mlk::MatrixGemmTestCase<float>, 3> tests {test_1, test_2, test_3};
+std::array<mlk::GemmTestCase<float>, 3> tests {test_1, test_2, test_3};
 
 }

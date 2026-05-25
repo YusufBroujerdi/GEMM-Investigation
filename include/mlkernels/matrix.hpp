@@ -64,14 +64,14 @@ private:
 };
 
 template <typename T>
-class MatrixGemmTestCase {
+class GemmTestCase {
 
 public:
 
-    MatrixGemmTestCase(Matrix<T> left, Matrix<T> right, Matrix<T> output)
+    GemmTestCase(Matrix<T> left, Matrix<T> right, Matrix<T> output)
         : left_(left), right_(right), output_(output), name_("generic") {}
 
-    MatrixGemmTestCase(Matrix<T> left,
+    GemmTestCase(Matrix<T> left,
                    Matrix<T> right,
                    Matrix<T> output,
                    std::string name)

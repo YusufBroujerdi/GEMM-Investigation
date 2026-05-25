@@ -4,5 +4,5 @@
 
 namespace gemm_sanity_tests{
 
-    extern std::array<mlk::MatrixGemmTestCase<float>, 3> tests;
+    extern std::array<mlk::GemmTestCase<float>, 3> tests;
 }
