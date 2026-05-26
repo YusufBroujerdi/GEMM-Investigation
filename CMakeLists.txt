@@ -79,5 +79,10 @@ target_link_libraries(test_gemm
 
 enable_testing()
 
-add_test(NAME test_gemm COMMAND test_gemm)
+add_test(
+    NAME
+        test_gemm
+    COMMAND
+        test_gemm ${GENERATED_TEST_CASES}/test_details.txt
+)
 

@@ -3,10 +3,24 @@
 #include <vector>
 #include <cstddef>
 #include <algorithm>
+#include <iomanip>
+#include <ostream>
 #include <string>
 #include <stdexcept>
 
 namespace mlk {
+
+
+enum class FloatTypes {
+    Float = 0,
+    Double = 1,
+};
+
+enum class GemmKernels {
+    Naive = 0,
+    Reordered = 1
+};
+
 
 template <typename T>
 class Matrix {
@@ -56,12 +70,27 @@ public:
         std::fill(data_.begin(), data_.end(), value);
     }
 
+    void write(std::ostream& output) const {
+
+        std::size_t i, j;
+
+        output << "Matrix values: [\n";
+        for (i = 0; i < rows_; i++) {
+            for (j = 0; j < cols_; j++)
+                output << std::fixed << std::setprecision(10)
+                    << std::setw(18) << (*this)(i, j) << " ";
+            output << "\n";
+        }
+        output << "]\n";
+    }
+
 private:
 
     std::size_t rows_;
     std::size_t cols_;
     std::vector<T> data_;
 };
+
 
 template <typename T>
 class GemmTestCase {
@@ -84,6 +113,16 @@ public:
     const Matrix<T>& right() const {return right_; }
 
     const Matrix<T>& output() const {return output_; }
+
+    void write(std::ostream& output) const {
+
+        output << "Left ";
+        left_.write(output);
+        output << "Right ";
+        right_.write(output);
+        output << "Output ";
+        output_.write(output);
+    }
 
 private:
 

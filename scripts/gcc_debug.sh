@@ -18,7 +18,7 @@ fi
 cmake -S . -B build-gcc-debug \
 -DCMAKE_CXX_COMPILER=g++ \
 -DCMAKE_BUILD_TYPE=Debug \
--DCMAKE_EXPORT_COMPILER_COMMANDS=ON \
+-DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
 -DPython3_EXECUTABLE="${CONDA_PREFIX}/bin/python"
 
 cmake --build build-gcc-debug
