@@ -8,28 +8,37 @@
 #include <iomanip>
 
 #include "mlkernels/gemm.hpp"
+#include "mlkernels/validate.hpp"
 #include "gemm_sanity_tests.hpp"
 #include "gemm_python_tests.hpp"
 
+template <typename T>
+constexpr T tolerance;
+
+template<>
+constexpr double tolerance<double> = 0.00001;
+
+template<>
+constexpr float tolerance<float> = 0.001f;
 
 template <typename T>
 int test_gemm_on_constants(const mlk::GemmTestCase<T>& testcase,
-                           GemmFunctionPtr<T> gemm, std::filesystem::path path) {
+                           GemmFunctionPtr<T> gemm,
+                           std::filesystem::path details_path) {
 
-    std::size_t i;
-    std::ofstream file{path};
+    std::ofstream file{details_path};
     
     mlk::Matrix<T> candidate{testcase.left().rows(), testcase.right().cols()};
     gemm(testcase.left(), testcase.right(), candidate);
 
-    for (i = 0; i < candidate.size(); i++) 
-        if (std::abs(candidate.data()[i] - testcase.output().data()[i]) > 0.001)
-            {                
-            file << "Test case " << i << " has failed.\n";
-            testcase.write(file);
-            candidate.write(file);
-            return 1;
-            }
+    if (mlk::max_abs_diff(candidate, testcase.output()) > tolerance<T>)
+        {                
+        file << "Test case " << testcase.name() << " has failed.\n";
+        testcase.write(file);
+        file << "Candidate ";
+        candidate.write(file);
+        return 1;
+        }
 
     file << "All tests passed successfully.\n";
     return 0;
@@ -38,7 +47,8 @@ int test_gemm_on_constants(const mlk::GemmTestCase<T>& testcase,
 int main(int argc, char* argv[]) {
 
     if (argc != 2)
-        throw std::invalid_argument("Give a single argument representing path.");
+        throw std::invalid_argument(
+            "Give a single argument representing the path for test details.");
 
     std::filesystem::path path{argv[1]};
 

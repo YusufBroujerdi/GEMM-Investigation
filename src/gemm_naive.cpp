@@ -9,20 +9,17 @@ void mlk::naive_gemm(
     mlk::Matrix<T>& output
 )
 {
-    //If i1, i2, i3, correspond to the row of left, right and output resp.
-    //and j1, j2, j3, correspond to the col of left, right and output resp.
-    //we have j1 = i2, i1 = i3 and j2 = j3
     std::size_t i, j, k;
 
     if (left.cols() != right.rows())
         throw std::invalid_argument(
-            "naive_gemm: left.cols() must equal right.rows() for matrix multiplication."
+            "left.cols() must equal right.rows() for matrix multiplication."
         );
 
     if (left.rows() != output.rows()
         or right.cols() != output.cols())
         throw std::invalid_argument(
-            "naive_gemm: output matrix dimensions must be left.rows() by right.cols()."
+            "output matrix dimensions must be left.rows() by right.cols()."
         );
 
     output.fill(0);
