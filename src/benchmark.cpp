@@ -113,16 +113,6 @@ private:
 };
 
 
-void read_benchmarks(std::queue<GemmBenchmark>& benchmarks, std::ifstream& spec) {
-
-    std::string line;
-
-    std::getline(spec, line);
-    while (std::getline(spec, line))
-        benchmarks.emplace(GemmBenchmark(line));
-}
-
-
 class BenchResult {
 
 public:
@@ -194,15 +184,6 @@ void write_benchresult(BenchResult& result, std::ofstream& file) {
 }
 
 
-void write_benchresults(std::queue<BenchResult>& results, std::ofstream& file) {
-    
-    while (!results.empty()) {
-        write_benchresult(results.front(), file);
-        results.pop();
-    }
-}
-
-
 template<typename T>
 BenchResult benchmark_templated(GemmBenchmark spec) {
 
@@ -271,7 +252,11 @@ void benchmark(std::filesystem::path spec_csv, std::filesystem::path result_csv)
     std::queue<GemmBenchmark> spec_list;
     std::queue<BenchResult> res_list;
 
-    read_benchmarks(spec_list, specs);
+    // load the benchmark specs (the first row of the csv is a header)
+    std::string line;
+    std::getline(specs, line);
+    while (std::getline(specs, line))
+        spec_list.emplace(GemmBenchmark(line));
 
     while (!spec_list.empty()) {
         res_list.push(benchmark(spec_list.front()));
@@ -279,5 +264,12 @@ void benchmark(std::filesystem::path spec_csv, std::filesystem::path result_csv)
     }
 
     std::ofstream result{result_csv};
-    write_benchresults(res_list, result);
+
+    result << "case_name,M,K,N,float_type,kernel,block_size,threads,repetitions,seed,";
+    result << "time_ms_min,time_ms_max,time_ms_mean,gflops_per_second,";
+    result << "max_abs_error,max_rel_error,mean_abs_error,validation_result\n";
+    while (!res_list.empty()) {
+        write_benchresult(res_list.front(), result);
+        res_list.pop();
+    }
 }
