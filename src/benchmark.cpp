@@ -1,5 +1,7 @@
 #include "mlkernels/matrix.hpp"
+#include "mlkernels/gemm.hpp"
 #include "mlkernels/benchmark.hpp"
+#include "mlkernels/validate.hpp"
 #include <string>
 #include <array>
 #include <queue>
@@ -9,6 +11,7 @@
 #include <chrono>
 #include <stdexcept>
 #include <cstdint>
+#include <random>
 
 
 constexpr std::uint16_t benchmark_schema_size = 10;
@@ -19,6 +22,12 @@ std::map<std::string, mlk::GemmKernels> kernel_lookup{
 };
 
 std::array<std::string, 2> kernel_str_lookup = {"gemm_naive", "gemm_reordered"};
+
+template<typename T>
+std::array<GemmFunctionPtr<T>, 2> kernel_func_lookup = {
+    mlk::naive_gemm,
+    mlk::reordered_gemm
+};
 
 std::map<std::string, mlk::FloatTypes> float_lookup{
     {"float", mlk::FloatTypes::Float},
@@ -126,18 +135,17 @@ public:
         GemmBenchmark original_benchmark,
         std::chrono::milliseconds time_ms_min,
         std::chrono::milliseconds time_ms_max,
-        std::chrono::milliseconds time_ms_median,
-        std::chrono::milliseconds time_ms_mean,
+        std::chrono::duration<double, std::milli> time_ms_mean,
         double gflops_per_second,
         double max_abs_error,
         double max_rel_error,
         double mean_abs_error,
         bool validation_result
     ) : original_benchmark_(original_benchmark), time_ms_min_(time_ms_min),
-        time_ms_max_(time_ms_max), time_ms_median_(time_ms_median),
-        time_ms_mean_(time_ms_mean), gflops_per_second_(gflops_per_second),
-        max_abs_error_(max_abs_error), max_rel_error_(max_rel_error),
-        mean_abs_error_(mean_abs_error), validation_result_(validation_result) {}
+        time_ms_max_(time_ms_max), time_ms_mean_(time_ms_mean),
+        gflops_per_second_(gflops_per_second), max_abs_error_(max_abs_error),
+        max_rel_error_(max_rel_error), mean_abs_error_(mean_abs_error),
+        validation_result_(validation_result) {}
 
     const GemmBenchmark& original_benchmark() const { return original_benchmark_; }
 
@@ -145,9 +153,7 @@ public:
 
     std::chrono::milliseconds time_ms_max() const { return time_ms_max_; }
 
-    std::chrono::milliseconds time_ms_median() const { return time_ms_median_; }
-
-    std::chrono::milliseconds time_ms_mean() const { return time_ms_mean_; }
+    std::chrono::duration<double, std::milli> time_ms_mean() const { return time_ms_mean_; }
 
     double gflops_per_second() const { return gflops_per_second_; }
 
@@ -164,8 +170,7 @@ private:
     GemmBenchmark original_benchmark_;
     std::chrono::milliseconds time_ms_min_;
     std::chrono::milliseconds time_ms_max_;
-    std::chrono::milliseconds time_ms_median_;
-    std::chrono::milliseconds time_ms_mean_;
+    std::chrono::duration<double, std::milli> time_ms_mean_;
     double gflops_per_second_;
     double max_abs_error_;
     double max_rel_error_;
@@ -186,10 +191,9 @@ void write_benchresult(BenchResult& result, std::ofstream& file) {
         << bm.seed() << ",";
 
     file << result.time_ms_min().count() << "," << result.time_ms_max().count() << ","
-        << result.time_ms_median().count() << "," << result.time_ms_mean().count()
-        << "," << result.gflops_per_second() << "," << result.max_abs_error() << ","
-        << result.max_rel_error() << "," << result.mean_abs_error() << ","
-        << result.validation_result() << '\n';
+        << result.time_ms_mean().count() << "," << result.gflops_per_second() << ","
+        << result.max_abs_error() << "," << result.max_rel_error() << ","
+        << result.mean_abs_error() << "," << result.validation_result() << '\n';
 
 }
 
@@ -204,5 +208,59 @@ void write_benchresults(std::queue<BenchResult>& results, std::filesystem::path 
     while (!results.empty()) {
         write_benchresult(results.front(), file);
         results.pop();
+    }
+}
+
+
+template<typename T>
+BenchResult benchmark_templated(GemmBenchmark spec) {
+
+    using clock = std::chrono::steady_clock;
+    using ms = std::chrono::milliseconds;
+    ms min{ms::max()}, max{0}, sum{0};
+    std::mt19937_64 gen{spec.seed()};
+
+    mlk::GemmTestCase<T> test_case {spec.m(), spec.k(), spec.n(), gen, spec.case_name()};
+    mlk::Matrix<T> candidate {spec.m(), spec.n()};
+    GemmFunctionPtr<T> gemm = kernel_func_lookup<T>[to_index(spec.kernel())];
+
+    //Warm-up / validation
+    gemm(test_case.left(), test_case.right(), candidate);
+    T max_abs_diff = mlk::max_abs_diff(candidate, test_case.output());
+    T max_rel_diff = mlk::max_rel_diff(candidate, test_case.output());
+    T mean_abs_diff = mlk::mean_abs_diff(candidate, test_case.output());
+    bool validation_result = max_abs_diff < mlk::tolerance<T>;
+    gemm(test_case.left(), test_case.right(), candidate);
+
+    for (std::uint64_t i = 0; i < spec.repetitions(); i++) {
+
+        auto begin = clock::now();
+        gemm(test_case.left(), test_case.right(), candidate);
+        auto end = clock::now();
+
+        auto duration = std::chrono::duration_cast<ms>(end - begin);
+        min = duration < min ? duration : min;
+        max = duration > max ? duration : max;
+        sum += duration;
+    }
+
+    double computations = static_cast<double>(2 * spec.m() * spec.n() * spec.k());
+    double gflops = computations / sum.count() / 1e6;
+    std::chrono::duration<double, std::milli> mean = sum / spec.repetitions();
+
+    return {spec, min, max, mean, gflops,
+        max_abs_diff, max_rel_diff, mean_abs_diff, validation_result};
+}
+        
+
+BenchResult benchmark(GemmBenchmark spec) {
+
+    switch (spec.float_type()) {
+
+        case mlk::FloatTypes::Float:
+            return benchmark_templated<float>(spec);
+
+        case mlk::FloatTypes::Double:
+            return benchmark_templated<double>(spec);
     }
 }
