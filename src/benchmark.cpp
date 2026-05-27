@@ -113,16 +113,12 @@ private:
 };
 
 
-void read_benchmarks(std::queue<GemmBenchmark>& benchmarks, std::filesystem::path path) {
+void read_benchmarks(std::queue<GemmBenchmark>& benchmarks, std::ifstream& spec) {
 
     std::string line;
-    std::ifstream file{path};
 
-    if (!file)
-        throw std::invalid_argument("Invalid file address");
-
-    std::getline(file, line);
-    while (std::getline(file, line))
+    std::getline(spec, line);
+    while (std::getline(spec, line))
         benchmarks.emplace(GemmBenchmark(line));
 }
 
@@ -198,12 +194,7 @@ void write_benchresult(BenchResult& result, std::ofstream& file) {
 }
 
 
-void write_benchresults(std::queue<BenchResult>& results, std::filesystem::path path) {
-
-    std::ofstream file{path};
-
-    if (!file)
-        throw std::invalid_argument("Invalid file address");
+void write_benchresults(std::queue<BenchResult>& results, std::ofstream& file) {
     
     while (!results.empty()) {
         write_benchresult(results.front(), file);
@@ -263,4 +254,30 @@ BenchResult benchmark(GemmBenchmark spec) {
         case mlk::FloatTypes::Double:
             return benchmark_templated<double>(spec);
     }
+}
+
+
+void benchmark(std::filesystem::path spec_csv, std::filesystem::path result_csv) {
+
+    auto parent = result_csv.parent_path();
+    if (!std::filesystem::exists(parent))
+        std::filesystem::create_directory(parent);
+
+    std::ifstream specs{spec_csv};
+
+    if (!specs)
+        throw std::invalid_argument("spec csv file error.");
+
+    std::queue<GemmBenchmark> spec_list;
+    std::queue<BenchResult> res_list;
+
+    read_benchmarks(spec_list, specs);
+
+    while (!spec_list.empty()) {
+        res_list.push(benchmark(spec_list.front()));
+        spec_list.pop();
+    }
+
+    std::ofstream result{result_csv};
+    write_benchresults(res_list, result);
 }
