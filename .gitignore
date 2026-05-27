@@ -2,4 +2,4 @@ build/*
 build-*/
 cmake-build-*/
 .cache/
-plan.ods
+*.ods*

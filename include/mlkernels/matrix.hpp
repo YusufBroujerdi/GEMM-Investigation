@@ -7,6 +7,7 @@
 #include <ostream>
 #include <string>
 #include <stdexcept>
+#include <random>
 
 namespace mlk {
 
@@ -32,6 +33,15 @@ public:
 
     Matrix(std::size_t rows, std::size_t cols)
         : rows_(rows), cols_(cols), data_(rows * cols) {}
+
+    Matrix(std::size_t rows, std::size_t cols, std::mt19937_64& gen)
+        : Matrix(rows, cols) {
+
+            std::normal_distribution<float> normal{0.0, 100.0};
+
+            for (T& value : data_)
+                value = normal(gen);
+        }
 
     template <std::size_t N>
     Matrix(std::size_t rows, std::size_t cols, const T (&values)[N])
@@ -84,6 +94,14 @@ public:
         output << "]\n";
     }
 
+    void randomize(std::mt19937_64& gen) {
+
+        std::normal_distribution<float> normal{0.0, 100.0};
+
+        for (T& value : data_)
+            value = normal(gen);
+    }
+
 private:
 
     std::size_t rows_;
@@ -106,6 +124,22 @@ public:
                    std::string name)
         : left_(left), right_(right), output_(output), name_(name) {}
 
+    GemmTestCase(std::size_t M,
+                   std::size_t K,
+                   std::size_t N,
+                   std::mt19937_64& gen,
+                   std::string name)
+    : left_(M, K, gen), right_ (K, N, gen), output_(M, N), name_(name) {
+
+        reordered_gemm(left_, right_ , output_);
+    }
+
+    GemmTestCase(std::size_t M,
+                 std::size_t K,
+                 std::size_t N,
+                 std::mt19937_64& gen)
+    : GemmTestCase(M, K, N, gen, "Generic_Random") {}
+
     const std::string& name() const { return name_; }
 
     const Matrix<T>& left() const { return left_; }
@@ -122,6 +156,13 @@ public:
         right_.write(output);
         output << "Output ";
         output_.write(output);
+    }
+
+    void randomize(std::mt19937_64& gen) {
+
+        left_.randomize(gen);
+        right_.randomize(gen);
+        output_.randomize(gen);
     }
 
 private:

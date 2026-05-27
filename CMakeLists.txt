@@ -71,6 +71,16 @@ add_executable(test_gemm
     tests/test_gemm.cpp
 )
 
+add_executable(test_randomization
+    tests/test_randomization.cpp
+)
+
+target_link_libraries(test_randomization
+    PRIVATE
+        mlkernels
+        testcases
+)
+
 target_link_libraries(test_gemm
     PRIVATE
         mlkernels

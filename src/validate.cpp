@@ -6,9 +6,9 @@
 namespace mlk {
 
 template<typename T>
-T max_abs_diff(Matrix<T> candidate, Matrix<T> reference) {
+T max_abs_diff(const Matrix<T>& candidate, const Matrix<T>& reference) {
 
-    Matrix<T> can = candidate, ref = reference;
+    const Matrix<T>& can = candidate, & ref = reference;
 
     if (can.rows() != ref.rows() || can.cols() != ref.cols())
         throw std::invalid_argument("Matrices for validation have different dimensions");
@@ -24,9 +24,9 @@ T max_abs_diff(Matrix<T> candidate, Matrix<T> reference) {
 }
 
 template<typename T>
-T max_rel_diff(Matrix<T> candidate, Matrix<T> reference) {
+T max_rel_diff(const Matrix<T>& candidate, const Matrix<T>& reference) {
 
-    Matrix<T> can = candidate, ref = reference;
+    const Matrix<T>& can = candidate, & ref = reference;
 
     if (can.rows() != ref.rows() || can.cols() != ref.cols())
         throw std::invalid_argument("Matrices for validation have different dimensions");
@@ -49,9 +49,9 @@ T max_rel_diff(Matrix<T> candidate, Matrix<T> reference) {
 
 
 template<typename T>
-T mean_abs_diff(Matrix<T> candidate, Matrix<T> reference) {
+T mean_abs_diff(const Matrix<T>& candidate, const Matrix<T>& reference) {
 
-    Matrix<T> can = candidate, ref = reference;
+    const Matrix<T>& can = candidate, & ref = reference;
 
     if (can.rows() != ref.rows() || can.cols() != ref.cols())
         throw std::invalid_argument("Matrices for validation have different dimensions");
@@ -66,9 +66,9 @@ T mean_abs_diff(Matrix<T> candidate, Matrix<T> reference) {
 }
 
 template <typename T>
-T mean_rel_diff(Matrix<T> candidate, Matrix<T> reference) {
+T mean_rel_diff(const Matrix<T>& candidate, const Matrix<T>& reference) {
 
-    Matrix<T> can = candidate, ref = reference;
+    const Matrix<T>& can = candidate, & ref = reference;
 
     if (can.rows() != ref.rows() || can.cols() != ref.cols())
         throw std::invalid_argument("Matrices for validation have different dimensions");
@@ -88,16 +88,16 @@ T mean_rel_diff(Matrix<T> candidate, Matrix<T> reference) {
     return sum / (ref.rows() * ref.cols());
 }
 
-template float  max_abs_diff<float> (Matrix<float>,  Matrix<float>);
-template double max_abs_diff<double>(Matrix<double>, Matrix<double>);
+template float  max_abs_diff<float> (const Matrix<float>&,  const Matrix<float>&);
+template double max_abs_diff<double>(const Matrix<double>&, const Matrix<double>&);
 
-template float  max_rel_diff<float> (Matrix<float>,  Matrix<float>);
-template double max_rel_diff<double>(Matrix<double>, Matrix<double>);
+template float  max_rel_diff<float> (const Matrix<float>&,  const Matrix<float>&);
+template double max_rel_diff<double>(const Matrix<double>&, const Matrix<double>&);
 
-template float  mean_abs_diff<float> (Matrix<float>,  Matrix<float>);
-template double mean_abs_diff<double>(Matrix<double>, Matrix<double>);
+template float  mean_abs_diff<float> (const Matrix<float>&,  const Matrix<float>&);
+template double mean_abs_diff<double>(const Matrix<double>&, const Matrix<double>&);
 
-template float  mean_rel_diff<float> (Matrix<float>,  Matrix<float>);
-template double mean_rel_diff<double>(Matrix<double>, Matrix<double>);
+template float  mean_rel_diff<float> (const Matrix<float>&,  const Matrix<float>&);
+template double mean_rel_diff<double>(const Matrix<double>&, const Matrix<double>&);
 
 }

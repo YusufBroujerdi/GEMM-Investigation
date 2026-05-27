@@ -10,15 +10,15 @@ enum class validation {
 };
 
 template <typename T>
-T max_abs_diff(Matrix<T> candidate, Matrix<T> reference);
+T max_abs_diff(const Matrix<T>& candidate, const Matrix<T>& reference);
 
 template <typename T>
-T max_rel_diff(Matrix<T> candidate, Matrix<T> reference);
+T max_rel_diff(const Matrix<T>& candidate, const Matrix<T>& reference);
 
 template <typename T>
-T mean_abs_diff(Matrix<T> candidate, Matrix<T> reference);
+T mean_abs_diff(const Matrix<T>& candidate, const Matrix<T>& reference);
 
 template <typename T>
-T mean_rel_diff(Matrix<T> candidate, Matrix<T> reference);
+T mean_rel_diff(const Matrix<T>& candidate, const Matrix<T>& reference);
 
 }
