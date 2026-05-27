@@ -13,15 +13,6 @@
 #include "gemm_python_tests.hpp"
 
 template <typename T>
-constexpr T tolerance;
-
-template<>
-constexpr double tolerance<double> = 0.0001;
-
-template<>
-constexpr float tolerance<float> = 0.001f;
-
-template <typename T>
 int test_gemm_on_constants(const mlk::GemmTestCase<T>& testcase,
                            GemmFunctionPtr<T> gemm,
                            std::filesystem::path details_path) {
@@ -31,7 +22,7 @@ int test_gemm_on_constants(const mlk::GemmTestCase<T>& testcase,
     mlk::Matrix<T> candidate{testcase.left().rows(), testcase.right().cols()};
     gemm(testcase.left(), testcase.right(), candidate);
 
-    if (mlk::max_abs_diff(candidate, testcase.output()) > tolerance<T>)
+    if (mlk::max_abs_diff(candidate, testcase.output()) > mlk::tolerance<T>)
         {                
         file << "Test case " << testcase.name() << " has failed.\n";
         testcase.write(file);
