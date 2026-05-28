@@ -12,13 +12,14 @@
 #include <stdexcept>
 #include <cstdint>
 #include <random>
+#include <type_traits>
 
 
 constexpr std::uint16_t benchmark_schema_size = 10;
 
 std::map<std::string, mlk::GemmKernels> kernel_lookup{
-    {"gemm_naive" , mlk::GemmKernels::Naive},
-    {"gemm_reordered", mlk::GemmKernels::Reordered}
+    {"Kernel.naive" , mlk::GemmKernels::Naive},
+    {"Kernel.reordered", mlk::GemmKernels::Reordered}
 };
 
 std::array<std::string, 2> kernel_str_lookup = {"gemm_naive", "gemm_reordered"};
@@ -30,8 +31,8 @@ std::array<GemmFunctionPtr<T>, 2> kernel_func_lookup = {
 };
 
 std::map<std::string, mlk::FloatTypes> float_lookup{
-    {"float", mlk::FloatTypes::Float},
-    {"double", mlk::FloatTypes::Double}
+    {"FloatType.float_t", mlk::FloatTypes::Float},
+    {"FloatType.double_t", mlk::FloatTypes::Double}
 };
 
 std::array<std::string, 2> float_str_lookup = {"float", "double"};
@@ -235,6 +236,8 @@ BenchResult benchmark(GemmBenchmark spec) {
         case mlk::FloatTypes::Double:
             return benchmark_templated<double>(spec);
     }
+
+    throw std::logic_error("Failed to recognize float type");
 }
 
 

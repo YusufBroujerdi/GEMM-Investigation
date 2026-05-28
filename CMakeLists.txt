@@ -35,6 +35,7 @@ add_library(mlkernels
     src/gemm_naive.cpp
     src/gemm_reordered.cpp
     src/validate.cpp
+    src/benchmark.cpp
 )
 
 target_include_directories(mlkernels
