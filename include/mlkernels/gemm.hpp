@@ -16,6 +16,31 @@ void reordered_gemm(const Matrix<T>& left,
                     Matrix<T>& output
            );
 
+
+template<typename T>
+void tiled_gemm_a(const Matrix<T>& left,
+                const Matrix<T>& right,
+                Matrix<T>& output,
+                std::size_t max_block_size
+           );
+
+struct TileState;
+
+template<typename T>
+void tiled_gemm_b(const Matrix<T>& left,
+                const Matrix<T>& right,
+                Matrix<T>& output,
+                std::size_t max_block_size
+           );
+
+template<typename T>
+void tiled_gemm_b(
+    const mlk::Matrix<T>& left,
+    const mlk::Matrix<T>& right,
+    mlk::Matrix<T>& output,
+    TileState& ts
+);
+
 }
 
 template <typename T>

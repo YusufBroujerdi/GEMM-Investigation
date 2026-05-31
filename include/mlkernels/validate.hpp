@@ -25,5 +25,5 @@ template <typename T>
 constexpr T tolerance;
 
 template <> inline constexpr float  tolerance<float>  = 0.001f;
-template <> inline constexpr double tolerance<double> = 0.0001;
+template <> inline constexpr double tolerance<double> = 0.0005;
 }

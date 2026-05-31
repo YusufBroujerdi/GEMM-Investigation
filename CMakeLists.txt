@@ -34,6 +34,8 @@ add_custom_command(
 add_library(mlkernels
     src/gemm_naive.cpp
     src/gemm_reordered.cpp
+    src/gemm_tiled_a.cpp
+    src/gemm_tiled_b.cpp
     src/validate.cpp
     src/benchmark.cpp
 )
