@@ -13,21 +13,106 @@
 #include <cstdint>
 #include <random>
 #include <type_traits>
+#include <iostream>
+
+
+
+
+
+
+
+
+
+
+
 
 
 constexpr std::uint16_t benchmark_schema_size = 10;
+constexpr std::uint16_t number_of_gemms = 6;
 
 std::map<std::string, mlk::GemmKernels> kernel_lookup{
     {"Kernel.naive" , mlk::GemmKernels::Naive},
-    {"Kernel.reordered", mlk::GemmKernels::Reordered}
+    {"Kernel.reordered", mlk::GemmKernels::Reordered},
+    {"Kernel.tiled_a", mlk::GemmKernels::Tiled_a},
+    {"Kernel.tiled_b", mlk::GemmKernels::Tiled_b},
+    {"Kernel.multithreaded_a", mlk::GemmKernels::Multithreaded_a},
+    {"Kernel.multithreaded_b", mlk::GemmKernels::Multithreaded_b}
 };
 
-std::array<std::string, 2> kernel_str_lookup = {"gemm_naive", "gemm_reordered"};
+std::array<std::string, number_of_gemms> kernel_str_lookup = {
+    "gemm_naive",
+    "gemm_reordered",
+    "gemm_tiled_a",
+    "gemm_tiled_b",
+    "gemm_multithreaded_a",
+    "gemm_multithreaded_b"
+};
 
-template<typename T>
-std::array<GemmFunctionPtr<T>, 2> kernel_func_lookup = {
-    mlk::naive_gemm,
-    mlk::reordered_gemm
+template <typename T>
+using BenchmarkGemmFuncPtr = void (*)(
+    const mlk::Matrix<T>&,
+    const mlk::Matrix<T>&,
+    mlk::Matrix<T>&,
+    const GemmBenchmark&
+);
+
+template <typename T>
+void naive_gemm_wrapped (
+    const mlk::Matrix<T>& left,
+    const mlk::Matrix<T>& right,
+    mlk::Matrix<T>& output,
+    const GemmBenchmark&
+) { return mlk::naive_gemm(left, right, output); };
+
+template <typename T>
+void reordered_gemm_wrapped (
+    const mlk::Matrix<T>& left,
+    const mlk::Matrix<T>& right,
+    mlk::Matrix<T>& output,
+    const GemmBenchmark&
+) { return mlk::reordered_gemm(left, right, output); };
+
+template <typename T>
+void tiled_gemm_a_wrapped (
+    const mlk::Matrix<T>& left,
+    const mlk::Matrix<T>& right,
+    mlk::Matrix<T>& output,
+    const GemmBenchmark& schema
+) { return mlk::tiled_gemm_a(left, right, output, schema.block_size()); };
+
+template <typename T>
+void tiled_gemm_b_wrapped (
+    const mlk::Matrix<T>& left,
+    const mlk::Matrix<T>& right,
+    mlk::Matrix<T>& output,
+    const GemmBenchmark& schema
+) { return mlk::tiled_gemm_b(left, right, output, schema.block_size()); };
+
+template <typename T>
+void multithreaded_gemm_a_wrapped (
+    const mlk::Matrix<T>& left,
+    const mlk::Matrix<T>& right,
+    mlk::Matrix<T>& output,
+    const GemmBenchmark& schema
+) { return mlk::multithreaded_gemm_a(left, right, output, schema.block_size(), schema.threads()); };
+
+template <typename T>
+void multithreaded_gemm_b_wrapped (
+    const mlk::Matrix<T>& left,
+    const mlk::Matrix<T>& right,
+    mlk::Matrix<T>& output,
+    const GemmBenchmark& schema
+) { return mlk::multithreaded_gemm_b(left, right, output, schema.block_size(), schema.threads()); };
+
+
+template <typename T>
+std::array<BenchmarkGemmFuncPtr<T>, number_of_gemms> kernel_func_lookup = {
+    naive_gemm_wrapped,
+    reordered_gemm_wrapped,
+    tiled_gemm_a_wrapped,
+    tiled_gemm_b_wrapped,
+    multithreaded_gemm_a_wrapped,
+    multithreaded_gemm_b_wrapped
 };
 
 std::map<std::string, mlk::FloatTypes> float_lookup{
@@ -43,128 +128,97 @@ std::size_t to_index(Enum e) {
 }
 
 
-class GemmBenchmark
-{
 
-public:
 
-    GemmBenchmark(std::string schema) {
 
-        std::string::size_type index = 0;
-        std::string::size_type new_index = 0;
-        std::uint16_t schema_index = 0;
-        std::array<std::string, benchmark_schema_size> split_schema;
 
-        for (schema_index = 0; schema_index < benchmark_schema_size; schema_index++) {
 
-            new_index = schema.find(",", index);
-            split_schema[schema_index] = schema.substr(index, new_index - index);
-            if (new_index == std::string::npos && schema_index != 9)
-                throw std::invalid_argument("csv has wrong number of columns");
-            if (split_schema[schema_index] == "")
-                throw std::invalid_argument("field in csv empty");
-            index = ++new_index;
-        }
 
-        case_name_ = split_schema[0];
-        m_ = std::stoi(split_schema[1]);
-        k_ = std::stoi(split_schema[2]);
-        n_ = std::stoi(split_schema[3]);
-        float_type_ = float_lookup.at(split_schema[4]);
-        kernel_ = kernel_lookup.at(split_schema[5]);
-        block_size_ = std::stoi(split_schema[6]);
-        threads_ = std::stoi(split_schema[7]);
-        repetitions_ = std::stoi(split_schema[8]);
-        seed_ = std::stoi(split_schema[9]);
+
+
+
+
+
+
+
+
+GemmBenchmark::GemmBenchmark(std::string schema) {
+
+    std::string::size_type index = 0;
+    std::string::size_type new_index = 0;
+    std::uint16_t schema_index = 0;
+    std::array<std::string, benchmark_schema_size> split_schema;
+
+    for (schema_index = 0; schema_index < benchmark_schema_size; schema_index++) {
+
+        new_index = schema.find(",", index);
+        split_schema[schema_index] = schema.substr(index, new_index - index);
+        if (new_index == std::string::npos && schema_index != 9)
+            throw std::invalid_argument("csv has wrong number of columns");
+        if (split_schema[schema_index] == "")
+            throw std::invalid_argument("field in csv empty");
+        index = ++new_index;
     }
 
-    const std::string& case_name() const { return case_name_; }
-
-    std::size_t m() const { return m_; }
-
-    std::size_t k() const { return k_; }
-
-    std::size_t n() const { return n_; }
-
-    mlk::FloatTypes float_type() const { return float_type_; }
-
-    mlk::GemmKernels kernel() const { return kernel_; }
-
-    std::size_t block_size() const { return block_size_; }
-
-    std::uint64_t threads() const { return threads_; }
-
-    std::uint64_t repetitions() const { return repetitions_; }
-
-    std::uint64_t seed() const { return seed_; }
-
-private:
-
-    std::string case_name_;
-    std::size_t m_;
-    std::size_t k_;
-    std::size_t n_;
-    mlk::FloatTypes float_type_;
-    mlk::GemmKernels kernel_;
-    std::size_t block_size_;
-    std::uint64_t threads_;
-    std::uint64_t repetitions_;
-    std::uint64_t seed_;
-
-};
+    case_name_ = split_schema[0];
+    m_ = std::stoi(split_schema[1]);
+    k_ = std::stoi(split_schema[2]);
+    n_ = std::stoi(split_schema[3]);
+    float_type_ = float_lookup.at(split_schema[4]);
+    kernel_ = kernel_lookup.at(split_schema[5]);
+    block_size_ = std::stoi(split_schema[6]);
+    threads_ = std::stoi(split_schema[7]);
+    repetitions_ = std::stoi(split_schema[8]);
+    seed_ = std::stoi(split_schema[9]);
+}
 
 
-class BenchResult {
+const std::string& GemmBenchmark::case_name() const { return case_name_; }
+std::size_t GemmBenchmark::m() const { return m_; }
+std::size_t GemmBenchmark::k() const { return k_; }
+std::size_t GemmBenchmark::n() const { return n_; }
+mlk::FloatTypes GemmBenchmark::float_type() const { return float_type_; }
+mlk::GemmKernels GemmBenchmark::kernel() const { return kernel_; }
+std::size_t GemmBenchmark::block_size() const { return block_size_; }
+std::uint64_t GemmBenchmark::threads() const { return threads_; }
+std::uint64_t GemmBenchmark::repetitions() const { return repetitions_; }
+std::uint64_t GemmBenchmark::seed() const { return seed_; }
 
-public:
 
-    BenchResult(
-        GemmBenchmark original_benchmark,
-        std::chrono::milliseconds time_ms_min,
-        std::chrono::milliseconds time_ms_max,
-        std::chrono::duration<double, std::milli> time_ms_mean,
-        double gflops_per_second,
-        double max_abs_error,
-        double max_rel_error,
-        double mean_abs_error,
-        bool validation_result
-    ) : original_benchmark_(original_benchmark), time_ms_min_(time_ms_min),
-        time_ms_max_(time_ms_max), time_ms_mean_(time_ms_mean),
-        gflops_per_second_(gflops_per_second), max_abs_error_(max_abs_error),
-        max_rel_error_(max_rel_error), mean_abs_error_(mean_abs_error),
-        validation_result_(validation_result) {}
+BenchResult::BenchResult(
+    GemmBenchmark original_benchmark,
+    std::chrono::milliseconds time_ms_min,
+    std::chrono::milliseconds time_ms_max,
+    std::chrono::duration<double, std::milli> time_ms_mean,
+    double gflops_per_second,
+    double max_abs_error,
+    double max_rel_error,
+    double mean_abs_error,
+    bool validation_result
+) : original_benchmark_(original_benchmark), time_ms_min_(time_ms_min),
+    time_ms_max_(time_ms_max), time_ms_mean_(time_ms_mean),
+    gflops_per_second_(gflops_per_second), max_abs_error_(max_abs_error),
+    max_rel_error_(max_rel_error), mean_abs_error_(mean_abs_error),
+    validation_result_(validation_result) {}
 
-    const GemmBenchmark& original_benchmark() const { return original_benchmark_; }
+const GemmBenchmark& BenchResult::original_benchmark() const { return original_benchmark_; }
+std::chrono::milliseconds BenchResult::time_ms_min() const { return time_ms_min_; }
+std::chrono::milliseconds BenchResult::time_ms_max() const { return time_ms_max_; }
+std::chrono::duration<double, std::milli> BenchResult::time_ms_mean() const { return time_ms_mean_; }
+double BenchResult::gflops_per_second() const { return gflops_per_second_; }
+double BenchResult::max_abs_error() const { return max_abs_error_; }
+double BenchResult::max_rel_error() const { return max_rel_error_; }
+double BenchResult::mean_abs_error() const { return mean_abs_error_; }
+bool BenchResult::validation_result() const { return validation_result_; }
 
-    std::chrono::milliseconds time_ms_min() const { return time_ms_min_; }
 
-    std::chrono::milliseconds time_ms_max() const { return time_ms_max_; }
 
-    std::chrono::duration<double, std::milli> time_ms_mean() const { return time_ms_mean_; }
 
-    double gflops_per_second() const { return gflops_per_second_; }
 
-    double max_abs_error() const { return max_abs_error_; }
 
-    double max_rel_error() const { return max_rel_error_; }
 
-    double mean_abs_error() const { return mean_abs_error_; }
 
-    bool validation_result() const { return validation_result_; }
 
-private:
-
-    GemmBenchmark original_benchmark_;
-    std::chrono::milliseconds time_ms_min_;
-    std::chrono::milliseconds time_ms_max_;
-    std::chrono::duration<double, std::milli> time_ms_mean_;
-    double gflops_per_second_;
-    double max_abs_error_;
-    double max_rel_error_;
-    double mean_abs_error_;
-    bool validation_result_;
-
-};
 
 
 void write_benchresult(BenchResult& result, std::ofstream& file) {
@@ -193,33 +247,41 @@ BenchResult benchmark_templated(GemmBenchmark spec) {
     ms min{ms::max()}, max{0}, sum{0};
     std::mt19937_64 gen{spec.seed()};
 
+    std::cout << "Beginning test on " << spec.case_name() << "\n";
+
     mlk::GemmTestCase<T> test_case {spec.m(), spec.k(), spec.n(), gen, spec.case_name()};
     mlk::Matrix<T> candidate {spec.m(), spec.n()};
-    GemmFunctionPtr<T> gemm = kernel_func_lookup<T>[to_index(spec.kernel())];
+    BenchmarkGemmFuncPtr<T> gemm = kernel_func_lookup<T>[to_index(spec.kernel())];
 
     //Warm-up / validation
-    gemm(test_case.left(), test_case.right(), candidate);
+    gemm(test_case.left(), test_case.right(), candidate, spec);
     T max_abs_diff = mlk::max_abs_diff(candidate, test_case.output());
     T max_rel_diff = mlk::max_rel_diff(candidate, test_case.output());
     T mean_abs_diff = mlk::mean_abs_diff(candidate, test_case.output());
     bool validation_result = max_abs_diff < mlk::tolerance<T>;
-    gemm(test_case.left(), test_case.right(), candidate);
+    gemm(test_case.left(), test_case.right(), candidate, spec);
+
+    std::cout << "Warm-up complete\n";
 
     for (std::uint64_t i = 0; i < spec.repetitions(); i++) {
 
         auto begin = clock::now();
-        gemm(test_case.left(), test_case.right(), candidate);
+        gemm(test_case.left(), test_case.right(), candidate, spec);
         auto end = clock::now();
 
         auto duration = std::chrono::duration_cast<ms>(end - begin);
         min = duration < min ? duration : min;
         max = duration > max ? duration : max;
         sum += duration;
+
+        std::cout << "Iteration " << i + 1 << " complete\n";
     }
 
     double computations = static_cast<double>(2 * spec.m() * spec.n() * spec.k());
     double gflops = computations / sum.count() / 1e6;
     std::chrono::duration<double, std::milli> mean = sum / spec.repetitions();
+
+    std::cout << "Test case successfully complete. Results written to file\n";
 
     return {spec, min, max, mean, gflops,
         max_abs_diff, max_rel_diff, mean_abs_diff, validation_result};

@@ -17,11 +17,6 @@ enum class FloatTypes {
     Double = 1,
 };
 
-enum class GemmKernels {
-    Naive = 0,
-    Reordered = 1
-};
-
 
 template <typename T>
 class Matrix {

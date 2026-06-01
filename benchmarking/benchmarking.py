@@ -4,12 +4,16 @@ import subprocess
 import pandas as pd
 
 class FloatType(Enum):
-    float_t = 0
-    double_t = 1
+    float_t = 'float'
+    double_t = 'double'
 
 class Kernel(Enum):
-    naive = 0
-    reordered = 1
+    naive = 'gemm_naive'
+    reordered = 'gemm_reordered'
+    tiled_a = 'gemm_tiled_a'
+    tiled_b = 'gemm_tiled_b'
+    multithreaded_a = 'gemm_multithreaded_a'
+    multithreaded_b = 'gemm_multithreaded_b'
 
 class Spec:
 
@@ -30,6 +34,12 @@ class Spec:
 
         if type(float_type) is not FloatType or type(kernel) is not Kernel:
             raise TypeError('Use appropriate enums for spec')
+
+        if any([type(col) is not int for col in [m,n,k,block_size,threads,repetitions,seed]]):
+            raise TypeError('Expected int but didn\'t get one')
+
+        if type(case_name) is not str:
+            raise TypeError('case name must be str')
 
         self.case_name = case_name
         self.m = m
@@ -79,8 +89,32 @@ def evaluate_specs(specs):
 
     subprocess.run([bench_path, spec_csv_path, results_csv_path], check = True)
 
-    return pd.read_csv(results_csv_path)
+    df = pd.read_csv(results_csv_path, dtype = {
+        'case_name' : 'string',
+        'M' : 'int64',
+        'K' : 'int64',
+        'N' : 'int64',
+        'float_type' : 'string',
+        'kernel' : 'string',
+        'block_size' : 'int64',
+        'threads' : 'int64',
+        'repetitions' : 'int64',
+        'seed' : 'int64',
+        'time_ms_min' : 'float64',
+        'time_ms_max' : 'float64',
+        'time_ms_mean' : 'float64',
+        'gflops_per_second' : 'float64',
+        'max_abs_error' : 'float64',
+        'max_rel_error' : 'float64',
+        'mean_abs_error' : 'float64',
+        'validation_result' : 'bool'
+    }
+    )
 
+    df['float_type'] = df['float_type'].map(FloatType)
+    df['kernel'] = df['kernel'].map(Kernel)
+
+    return df
 
 
 if __name__ == '__main__':

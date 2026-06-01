@@ -9,6 +9,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 add_compile_options(-Wall -Wextra -Wpedantic)
 
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
+find_package(OpenMP REQUIRED)
 
 message(STATUS "Python executable: ${Python3_EXECUTABLE}")
 
@@ -36,6 +37,8 @@ add_library(mlkernels
     src/gemm_reordered.cpp
     src/gemm_tiled_a.cpp
     src/gemm_tiled_b.cpp
+    src/gemm_multithreaded_a.cpp
+    src/gemm_multithreaded_b.cpp
     src/validate.cpp
     src/benchmark.cpp
 )
@@ -43,6 +46,11 @@ add_library(mlkernels
 target_include_directories(mlkernels
     PUBLIC
         include
+)
+
+target_link_libraries(mlkernels
+    PUBLIC
+        OpenMP::OpenMP_CXX
 )
 
 add_library(testcases
