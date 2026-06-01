@@ -4,3 +4,5 @@ cmake-build-*/
 .cache/
 *.ods*
 *.csv
+*.ipynb
+*__pycache__*

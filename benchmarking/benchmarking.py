@@ -21,9 +21,9 @@ class Spec:
         self,
         *,
         case_name = "generic",
-        m = 1024,
-        k = 1024,
-        n = 1024,
+        m = 2048,
+        k = 2048,
+        n = 2048,
         float_type = FloatType.float_t,
         kernel = Kernel.reordered,
         block_size = 256,
@@ -119,8 +119,14 @@ def evaluate_specs(specs):
 
 if __name__ == '__main__':
 
-    evaluate_specs(Specs([
-        Spec(kernel = Kernel.naive),
-        Spec(),
-        Spec(k = 2048)
-    ]))
+    evaluate_specs(Specs(
+        [
+            Spec(
+                kernel = kernel_type,
+                case_name = kernel_type.name,
+                m = 2048,
+                n = 2048,
+                k = 2048
+            ) for kernel_type in Kernel
+        ]
+    ))

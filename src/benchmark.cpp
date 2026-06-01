@@ -278,7 +278,7 @@ BenchResult benchmark_templated(GemmBenchmark spec) {
     }
 
     double computations = static_cast<double>(2 * spec.m() * spec.n() * spec.k());
-    double gflops = computations / sum.count() / 1e6;
+    double gflops = computations * spec.repetitions() / sum.count() / 1e6;
     std::chrono::duration<double, std::milli> mean = sum / spec.repetitions();
 
     std::cout << "Test case successfully complete. Results written to file\n";
