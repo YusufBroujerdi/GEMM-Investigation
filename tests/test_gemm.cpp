@@ -51,6 +51,14 @@ void multithreaded_gemm_b_wrapped(
     mlk::multithreaded_gemm_b(left, right, output, test_tile_width, test_thread_num);
 };
 
+template <typename T>
+void multithreaded_gemm_c_wrapped(
+    const mlk::Matrix<T>& left,
+    const mlk::Matrix<T>& right,
+    mlk::Matrix<T>& output
+) {
+    mlk::multithreaded_gemm_c(left, right, output, test_thread_num);
+};
 
 template <typename T>
 mlk::validation test_gemm_on_constants(const mlk::GemmTestCase<T>& testcase,
@@ -115,6 +123,10 @@ int main(int argc, char* argv[]) {
             std::cout << "Multithreaded GEMM B failed on: " << test.name() << "\n";
             test_state = mlk::validation::Failed;
         }
+        if (test_gemm_on_constants(test, multithreaded_gemm_c_wrapped<float>, path) == mlk::validation::Failed) {
+            std::cout << "Multithreaded GEMM C failed on: " << test.name() << "\n";
+            test_state = mlk::validation::Failed;
+        }
     }
     }
 
@@ -144,6 +156,10 @@ int main(int argc, char* argv[]) {
         }
         if (test_gemm_on_constants(test, multithreaded_gemm_b_wrapped<double>, path) == mlk::validation::Failed) {
             std::cout << "Multithreaded GEMM B failed on: " << test.name() << "\n";
+            test_state = mlk::validation::Failed;
+        }
+        if (test_gemm_on_constants(test, multithreaded_gemm_c_wrapped<double>, path) == mlk::validation::Failed) {
+            std::cout << "Multithreaded GEMM C failed on: " << test.name() << "\n";
             test_state = mlk::validation::Failed;
         }
     }

@@ -33,12 +33,13 @@ add_custom_command(
 )
 
 add_library(mlkernels
-    src/gemm_naive.cpp
-    src/gemm_reordered.cpp
-    src/gemm_tiled_a.cpp
-    src/gemm_tiled_b.cpp
-    src/gemm_multithreaded_a.cpp
-    src/gemm_multithreaded_b.cpp
+    src/gemms/gemm_naive.cpp
+    src/gemms/gemm_reordered.cpp
+    src/gemms/gemm_tiled_a.cpp
+    src/gemms/gemm_tiled_b.cpp
+    src/gemms/gemm_multithreaded_a.cpp
+    src/gemms/gemm_multithreaded_b.cpp
+    src/gemms/gemm_multithreaded_c.cpp
     src/validate.cpp
     src/benchmark.cpp
 )
@@ -80,16 +81,6 @@ target_link_libraries(bench_gemm
 
 add_executable(test_gemm
     tests/test_gemm.cpp
-)
-
-add_executable(test_randomization
-    tests/test_randomization.cpp
-)
-
-target_link_libraries(test_randomization
-    PRIVATE
-        mlkernels
-        testcases
 )
 
 target_link_libraries(test_gemm

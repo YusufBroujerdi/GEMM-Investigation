@@ -28,7 +28,7 @@
 
 
 constexpr std::uint16_t benchmark_schema_size = 10;
-constexpr std::uint16_t number_of_gemms = 6;
+constexpr std::uint16_t number_of_gemms = 7;
 
 std::map<std::string, mlk::GemmKernels> kernel_lookup{
     {"Kernel.naive" , mlk::GemmKernels::Naive},
@@ -36,7 +36,8 @@ std::map<std::string, mlk::GemmKernels> kernel_lookup{
     {"Kernel.tiled_a", mlk::GemmKernels::Tiled_a},
     {"Kernel.tiled_b", mlk::GemmKernels::Tiled_b},
     {"Kernel.multithreaded_a", mlk::GemmKernels::Multithreaded_a},
-    {"Kernel.multithreaded_b", mlk::GemmKernels::Multithreaded_b}
+    {"Kernel.multithreaded_b", mlk::GemmKernels::Multithreaded_b},
+    {"Kernel.multithreaded_c", mlk::GemmKernels::Multithreaded_c}
 };
 
 std::array<std::string, number_of_gemms> kernel_str_lookup = {
@@ -45,7 +46,8 @@ std::array<std::string, number_of_gemms> kernel_str_lookup = {
     "gemm_tiled_a",
     "gemm_tiled_b",
     "gemm_multithreaded_a",
-    "gemm_multithreaded_b"
+    "gemm_multithreaded_b",
+    "gemm_multithreaded_c"
 };
 
 template <typename T>
@@ -104,6 +106,14 @@ void multithreaded_gemm_b_wrapped (
     const GemmBenchmark& schema
 ) { return mlk::multithreaded_gemm_b(left, right, output, schema.block_size(), schema.threads()); };
 
+template <typename T>
+void multithreaded_gemm_c_wrapped (
+    const mlk::Matrix<T>& left,
+    const mlk::Matrix<T>& right,
+    mlk::Matrix<T>& output,
+    const GemmBenchmark& schema
+) { return mlk::multithreaded_gemm_c(left, right, output, schema.threads()); };
+
 
 template <typename T>
 std::array<BenchmarkGemmFuncPtr<T>, number_of_gemms> kernel_func_lookup = {
@@ -112,7 +122,8 @@ std::array<BenchmarkGemmFuncPtr<T>, number_of_gemms> kernel_func_lookup = {
     tiled_gemm_a_wrapped,
     tiled_gemm_b_wrapped,
     multithreaded_gemm_a_wrapped,
-    multithreaded_gemm_b_wrapped
+    multithreaded_gemm_b_wrapped,
+    multithreaded_gemm_c_wrapped
 };
 
 std::map<std::string, mlk::FloatTypes> float_lookup{
@@ -212,15 +223,6 @@ double BenchResult::mean_abs_error() const { return mean_abs_error_; }
 bool BenchResult::validation_result() const { return validation_result_; }
 
 
-
-
-
-
-
-
-
-
-
 void write_benchresult(BenchResult& result, std::ofstream& file) {
 
     GemmBenchmark bm = result.original_benchmark();
@@ -237,6 +239,17 @@ void write_benchresult(BenchResult& result, std::ofstream& file) {
         << result.mean_abs_error() << "," << result.validation_result() << '\n';
 
 }
+
+
+
+
+
+
+
+
+
+
+
 
 
 template<typename T>
@@ -330,7 +343,7 @@ void benchmark(std::filesystem::path spec_csv, std::filesystem::path result_csv)
 
     std::ofstream result{result_csv};
 
-    result << "case_name,M,K,N,float_type,kernel,block_size,threads,repetitions,seed,";
+    result << "case_name,m,k,n,float_type,kernel,block_size,threads,repetitions,seed,";
     result << "time_ms_min,time_ms_max,time_ms_mean,gflops_per_second,";
     result << "max_abs_error,max_rel_error,mean_abs_error,validation_result\n";
     while (!res_list.empty()) {

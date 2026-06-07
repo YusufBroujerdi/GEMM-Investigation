@@ -76,6 +76,13 @@ void multithreaded_gemm_b(
     TileState& ts
 );
 
+template<typename T>
+void multithreaded_gemm_c(const Matrix<T>& left,
+                          const Matrix<T>& right,
+                          Matrix<T>& output,
+                          int n_threads
+);
+
 
 enum class GemmKernels {
     Naive = 0,
@@ -83,7 +90,8 @@ enum class GemmKernels {
     Tiled_a = 2,
     Tiled_b = 3,
     Multithreaded_a = 4,
-    Multithreaded_b = 5
+    Multithreaded_b = 5,
+    Multithreaded_c = 6
 };
 
 }
