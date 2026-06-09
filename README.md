@@ -17,6 +17,10 @@ Links can be found for more detail on the following:
 * [C++ Source](./src/README.md)
 * [GEMM implementations](./src/gemms/README.md)
 
+## Build instructions
+
+The project requires an anaconda environment to build. The environment.yaml file specifies an environment which can be used to build the project and run any script. Otherwise, I build the project using the shell scripts in /scripts.
+
 ## Results
 
 An overview of the results can be found in this same folder, in RESULTS.md:

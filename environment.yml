@@ -1,0 +1,11 @@
+name: cpp-ml-kernels
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - numpy
+  - pandas
+  - ipykernel
+  - altair
+  - vl-convert-python
+  - dataframe_image
