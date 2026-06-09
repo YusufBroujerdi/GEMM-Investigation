@@ -14,6 +14,7 @@ class Kernel(Enum):
     tiled_b = 'gemm_tiled_b'
     multithreaded_a = 'gemm_multithreaded_a'
     multithreaded_b = 'gemm_multithreaded_b'
+    multithreaded_c = 'gemm_multithreaded_c'
 
 class Spec:
 
@@ -79,7 +80,7 @@ class Specs(list):
 def evaluate_specs(specs):
 
     if type(specs) is not Specs:
-        raise TypeError('argument must have type Specs')
+        specs = Specs(specs)
 
     spec_csv_path = Path(__file__).resolve().parent / 'spec.csv'
     results_csv_path = Path(__file__).resolve().parent / 'results.csv'
@@ -91,9 +92,9 @@ def evaluate_specs(specs):
 
     df = pd.read_csv(results_csv_path, dtype = {
         'case_name' : 'string',
-        'M' : 'int64',
-        'K' : 'int64',
-        'N' : 'int64',
+        'm' : 'int64',
+        'k' : 'int64',
+        'n' : 'int64',
         'float_type' : 'string',
         'kernel' : 'string',
         'block_size' : 'int64',
