@@ -5,53 +5,60 @@
 namespace mlk {
 
 template<typename T>
-void naive_gemm(const Matrix<T>& left,
-                const Matrix<T>& right,
-                Matrix<T>& output
-           );
+void naive_gemm(
+    const Matrix<T>& left,
+    const Matrix<T>& right,
+    Matrix<T>& output
+);
 
 template<typename T>
-void reordered_gemm(const Matrix<T>& left,
-                    const Matrix<T>& right,
-                    Matrix<T>& output
-           );
+void reordered_gemm(
+    const Matrix<T>& left,
+    const Matrix<T>& right,
+    Matrix<T>& output
+);
 
 
 template<typename T>
-void tiled_gemm_a(const Matrix<T>& left,
-                const Matrix<T>& right,
-                Matrix<T>& output,
-                std::size_t max_block_size
-           );
+void tiled_gemm_a(
+    const Matrix<T>& left,
+    const Matrix<T>& right,
+    Matrix<T>& output,
+    std::size_t max_block_size
+);
 
 template<typename T>
-void tiled_gemm_b(const Matrix<T>& left,
-                const Matrix<T>& right,
-                Matrix<T>& output,
-                std::size_t max_block_size
-           );
+void tiled_gemm_b(
+    const Matrix<T>& left,
+    const Matrix<T>& right,
+    Matrix<T>& output,
+    std::size_t max_block_size
+);
 
 template<typename T>
-void multithreaded_gemm_a(const Matrix<T>& left,
-                          const Matrix<T>& right,
-                          Matrix<T>& output,
-                          std::size_t max_block_size,
-                          std::size_t num_threads
-           );
+void multithreaded_gemm_a(
+    const Matrix<T>& left,
+    const Matrix<T>& right,
+    Matrix<T>& output,
+    std::size_t max_block_size,
+    std::size_t num_threads
+);
 
 template<typename T>
-void multithreaded_gemm_b(const Matrix<T>& left,
-                          const Matrix<T>& right,
-                          Matrix<T>& output,
-                          std::size_t max_block_size,
-                          std::size_t num_threads
-           );
+void multithreaded_gemm_b(
+    const Matrix<T>& left,
+    const Matrix<T>& right,
+    Matrix<T>& output,
+    std::size_t max_block_size,
+    std::size_t num_threads
+);
 
 template<typename T>
-void multithreaded_gemm_c(const Matrix<T>& left,
-                          const Matrix<T>& right,
-                          Matrix<T>& output,
-                          std::size_t num_threads
+void multithreaded_gemm_c(
+    const Matrix<T>& left,
+    const Matrix<T>& right,
+    Matrix<T>& output,
+    std::size_t num_threads
 );
 
 
@@ -68,7 +75,8 @@ enum class GemmKernels {
 }
 
 template <typename T>
-using GemmFunctionPtr = void (*)(const mlk::Matrix<T>&,
-                                 const mlk::Matrix<T>&,
-                                 mlk::Matrix<T>&
-                                 );
+using GemmFunctionPtr = void (*)(
+    const mlk::Matrix<T>&,
+    const mlk::Matrix<T>&,
+    mlk::Matrix<T>&
+);

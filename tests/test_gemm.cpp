@@ -61,9 +61,11 @@ void multithreaded_gemm_c_wrapped(
 };
 
 template <typename T>
-mlk::validation test_gemm_on_constants(const mlk::GemmTestCase<T>& testcase,
-                           GemmFunctionPtr<T> gemm,
-                           std::filesystem::path details_path) {
+mlk::validation test_gemm_on_constants(
+    const mlk::GemmTestCase<T>& testcase,
+    GemmFunctionPtr<T> gemm,
+    std::filesystem::path details_path
+) {
 
     std::ofstream file{details_path, std::ios::app};
     
