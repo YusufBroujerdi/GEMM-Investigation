@@ -5,6 +5,7 @@
 
 #include "mlkernels/matrix.hpp"
 #include "mlkernels/gemm.hpp"
+#include "internal/gemm_detail.hpp"
 
 template<typename T>
 void mlk::multithreaded_gemm_b(
