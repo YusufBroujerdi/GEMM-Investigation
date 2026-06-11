@@ -38,11 +38,10 @@ public:
                 value = normal(gen);
         }
 
-    template <std::size_t N>
-    Matrix(std::size_t rows, std::size_t cols, const T (&values)[N])
+    Matrix(std::size_t rows, std::size_t cols, std::initializer_list<T> values)
         : Matrix(rows, cols) {
 
-        if(rows * cols != N)
+        if(rows * cols != values.size())
             throw std::invalid_argument(
                 "Number of values do not match matrix size."
             );
