@@ -40,8 +40,9 @@ add_library(mlkernels
     src/gemms/gemm_multithreaded_a.cpp
     src/gemms/gemm_multithreaded_b.cpp
     src/gemms/gemm_multithreaded_c.cpp
-    src/validate.cpp
     src/benchmark.cpp
+    src/matrix.cpp
+    src/validate.cpp
 )
 
 target_include_directories(mlkernels

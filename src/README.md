@@ -10,7 +10,7 @@ All of the gemm implementations live in the gemm folder. A brief description of 
 
 ## matrix.cpp
 
-This source file is currently empty. The header file matrix.hpp defines the templated matrix class as well as the TestCase class used in validation and benchmarking.
+Defines the templated Matrix class used by GEMM functions and the GemmTestCase class used in testing and benchmarking respectively.
 
 ## benchmark.cpp
 
