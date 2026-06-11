@@ -57,7 +57,7 @@ void multithreaded_gemm_a(const Matrix<T>& left,
                           const Matrix<T>& right,
                           Matrix<T>& output,
                           std::size_t max_block_size,
-                          int n_threads
+                          std::size_t num_threads
            );
 
 template<typename T>
@@ -65,7 +65,7 @@ void multithreaded_gemm_b(const Matrix<T>& left,
                           const Matrix<T>& right,
                           Matrix<T>& output,
                           std::size_t max_block_size,
-                          int n_threads
+                          std::size_t num_threads
            );
 
 template<typename T>
@@ -80,7 +80,7 @@ template<typename T>
 void multithreaded_gemm_c(const Matrix<T>& left,
                           const Matrix<T>& right,
                           Matrix<T>& output,
-                          int n_threads
+                          std::size_t num_threads
 );
 
 

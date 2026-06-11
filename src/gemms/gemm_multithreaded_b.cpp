@@ -12,7 +12,7 @@ void mlk::multithreaded_gemm_b(
     const mlk::Matrix<T>& right,
     mlk::Matrix<T>& output,
     std::size_t max_block_size,
-    int n_threads
+    std::size_t num_threads
 )
 {
     if (left.cols() != right.rows())
@@ -26,7 +26,7 @@ void mlk::multithreaded_gemm_b(
             "output matrix dimensions must be left.rows() by right.cols()."
         );
 
-    if (n_threads < 1)
+    if (num_threads < 1)
         throw std::invalid_argument(
             "n_threads must be at least 1."
         );
@@ -45,7 +45,7 @@ void mlk::multithreaded_gemm_b(
 
     //Spin up a team of n_threads workers; a single thread initiates the recursion
     //and the rest pick up tasks from the queue as they are spawned.
-    #pragma omp parallel num_threads(n_threads) default(none) shared(left, right, output, tilestate)
+    #pragma omp parallel num_threads(num_threads) default(none) shared(left, right, output, tilestate)
     {
         #pragma omp single
         multithreaded_gemm_b(left, right, output, tilestate);
@@ -133,7 +133,7 @@ void mlk::multithreaded_gemm_b<float>(
     const mlk::Matrix<float>& right,
     mlk::Matrix<float>& output,
     std::size_t max_block_size,
-    int n_threads
+    std::size_t num_threads
 );
 
 template
@@ -142,5 +142,5 @@ void mlk::multithreaded_gemm_b<double>(
     const mlk::Matrix<double>& right,
     mlk::Matrix<double>& output,
     std::size_t max_block_size,
-    int n_threads
+    std::size_t num_threads
 );

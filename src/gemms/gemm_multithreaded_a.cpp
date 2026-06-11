@@ -12,7 +12,7 @@ template<typename T> void mlk::multithreaded_gemm_a(
     const mlk::Matrix<T>& right,
     mlk::Matrix<T>& output,
     std::size_t max_block_size,
-    int n_threads
+    std::size_t num_threads
 )
 {
     if (left.cols() != right.rows())
@@ -26,14 +26,14 @@ template<typename T> void mlk::multithreaded_gemm_a(
             "output matrix dimensions must be left.rows() by right.cols()."
         );
 
-    if (n_threads < 1)
+    if (num_threads < 1)
         throw std::invalid_argument(
             "n_threads must be at least 1."
         );
 
     output.fill(0);
 
-    #pragma omp parallel for num_threads(n_threads) schedule(static) collapse(2)
+    #pragma omp parallel for num_threads(num_threads) schedule(static) collapse(2)
     for (std::size_t ib = 0; ib < output.rows(); ib += max_block_size)
         for (std::size_t jb = 0; jb < output.cols(); jb += max_block_size)
             for (std::size_t kb = 0; kb < left.cols(); kb += max_block_size)
@@ -59,7 +59,7 @@ void mlk::multithreaded_gemm_a<float>(
     const mlk::Matrix<float>& right,
     mlk::Matrix<float>& output,
     std::size_t max_block_size,
-    int n_threads
+    std::size_t n_threads
 );
 
 template
@@ -68,5 +68,5 @@ void mlk::multithreaded_gemm_a<double>(
     const mlk::Matrix<double>& right,
     mlk::Matrix<double>& output,
     std::size_t max_block_size,
-    int n_threads
+    std::size_t num_threads
 );
