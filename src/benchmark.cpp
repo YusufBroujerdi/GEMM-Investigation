@@ -198,8 +198,8 @@ std::uint64_t GemmBenchmark::seed() const { return seed_; }
 
 BenchResult::BenchResult(
     GemmBenchmark original_benchmark,
-    std::chrono::milliseconds time_ms_min,
-    std::chrono::milliseconds time_ms_max,
+    std::chrono::duration<double, std::milli> time_ms_min,
+    std::chrono::duration<double, std::milli> time_ms_max,
     std::chrono::duration<double, std::milli> time_ms_mean,
     double gflops_per_second,
     double max_abs_error,
@@ -213,8 +213,8 @@ BenchResult::BenchResult(
     validation_result_(validation_result) {}
 
 const GemmBenchmark& BenchResult::original_benchmark() const { return original_benchmark_; }
-std::chrono::milliseconds BenchResult::time_ms_min() const { return time_ms_min_; }
-std::chrono::milliseconds BenchResult::time_ms_max() const { return time_ms_max_; }
+std::chrono::duration<double, std::milli> BenchResult::time_ms_min() const { return time_ms_min_; }
+std::chrono::duration<double, std::milli> BenchResult::time_ms_max() const { return time_ms_max_; }
 std::chrono::duration<double, std::milli> BenchResult::time_ms_mean() const { return time_ms_mean_; }
 double BenchResult::gflops_per_second() const { return gflops_per_second_; }
 double BenchResult::max_abs_error() const { return max_abs_error_; }
@@ -256,8 +256,8 @@ template<typename T>
 BenchResult benchmark_templated(GemmBenchmark spec) {
 
     using clock = std::chrono::steady_clock;
-    using ms = std::chrono::milliseconds;
-    ms min{ms::max()}, max{0}, sum{0};
+    using dms = std::chrono::duration<double, std::milli>;
+    dms min{dms::max()}, max{0}, sum{0};
     std::mt19937_64 gen{spec.seed()};
 
     std::cout << "Beginning test on " << spec.case_name() << "\n";
@@ -282,7 +282,7 @@ BenchResult benchmark_templated(GemmBenchmark spec) {
         gemm(test_case.left(), test_case.right(), candidate, spec);
         auto end = clock::now();
 
-        auto duration = std::chrono::duration_cast<ms>(end - begin);
+        dms duration = end - begin;
         min = duration < min ? duration : min;
         max = duration > max ? duration : max;
         sum += duration;
@@ -290,9 +290,9 @@ BenchResult benchmark_templated(GemmBenchmark spec) {
         std::cout << "Iteration " << i + 1 << " complete\n";
     }
 
-    double computations = static_cast<double>(2 * spec.m() * spec.n() * spec.k());
+    double computations = 2.0 * spec.m() * spec.n() * spec.k();
     double gflops = computations * spec.repetitions() / sum.count() / 1e6;
-    std::chrono::duration<double, std::milli> mean = sum / spec.repetitions();
+    dms mean = sum / spec.repetitions();
 
     std::cout << "Test case successfully complete. Results written to file\n";
 

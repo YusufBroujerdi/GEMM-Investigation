@@ -45,8 +45,8 @@ public:
 
     BenchResult(
         GemmBenchmark original_benchmark,
-        std::chrono::milliseconds time_ms_min,
-        std::chrono::milliseconds time_ms_max,
+        std::chrono::duration<double, std::milli> time_ms_min,
+        std::chrono::duration<double, std::milli> time_ms_max,
         std::chrono::duration<double, std::milli> time_ms_mean,
         double gflops_per_second,
         double max_abs_error,
@@ -56,8 +56,8 @@ public:
     );
     
     const GemmBenchmark& original_benchmark() const; 
-    std::chrono::milliseconds time_ms_min() const; 
-    std::chrono::milliseconds time_ms_max() const; 
+    std::chrono::duration<double, std::milli> time_ms_min() const; 
+    std::chrono::duration<double, std::milli> time_ms_max() const; 
     std::chrono::duration<double, std::milli> time_ms_mean() const; 
     double gflops_per_second() const; 
     double max_abs_error() const; 
@@ -68,8 +68,8 @@ public:
 private:
 
     GemmBenchmark original_benchmark_;
-    std::chrono::milliseconds time_ms_min_;
-    std::chrono::milliseconds time_ms_max_;
+    std::chrono::duration<double, std::milli> time_ms_min_;
+    std::chrono::duration<double, std::milli> time_ms_max_;
     std::chrono::duration<double, std::milli> time_ms_mean_;
     double gflops_per_second_;
     double max_abs_error_;
