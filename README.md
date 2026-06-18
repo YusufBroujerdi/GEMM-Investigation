@@ -19,10 +19,25 @@ Links can be found for more detail on the following:
 
 ## Build instructions
 
-The project requires an anaconda environment to build. The environment.yaml file specifies an environment which can be used to build the project and run any script. Otherwise, I build the project using the shell scripts in /scripts.
+The project requires an anaconda environment to build. The environment.yaml file specifies an environment which can be used to build the project and run any Python script. Otherwise, I build the project using the shell scripts in /scripts.
 
 ## Results
 
 An overview of the results can be found in this same folder, in RESULTS.md:
 
 * [Results](./RESULTS.md)
+
+## Reproducing Results
+
+Every chart and table in the RESULTS.md is sourced directly from a python function defined in reproducible_results.py in benchmarking. So, for example, generating the table showing the first comparison of gemms by indeces can be derived by running the following from the project root:
+
+```bash
+(project_environment) cd benchmarking
+(project_environment) python3
+>>> from reproducible_results import compare_index_strategies
+>>> compare_index_strategies()
+```
+
+More details can be found in:
+
+* [Benchmarking](./benchmarking/README.md)
