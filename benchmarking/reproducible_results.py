@@ -47,14 +47,14 @@ def compare_index_strategies():
             bm.Spec(
                 case_name = f'{k}_test_{i}',
                 kernel = k,
-                repetitions = 2,
+                repetitions = 5,
                 seed = i,
                 m = 1024,
                 n = 1024,
                 k = 1024
             ) for (k, i) in it.product(
                 [bm.Kernel.naive, bm.Kernel.multithreaded_c, bm.Kernel.reordered],
-                range(0, 1)
+                range(0, 5)
             )
         ]
     )
