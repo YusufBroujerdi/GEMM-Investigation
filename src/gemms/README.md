@@ -6,7 +6,7 @@ Single-threaded. Uses naive index ordering (completes each element in a column o
 
 ## Reordered
 
-Single-threaded. Uses optimal index ordering: j, k, then i.
+Single-threaded. Uses optimal index ordering: i, k then j.
 
 ## Tiled_a
 
@@ -34,7 +34,7 @@ The size of the tile and number of threads are tunable parameters.
 
 ## Multithreaded_c
 
-The same as Reordered. However, the k index is moved to the inner loop to avoid atomic operations. In practice, this massively slows down the implementation.
+Similar to reordered. However, the index ordering is i, j, k, with the outer two indices multithreaded. The index ordering cannot match reordered without the use of atomics. In practice, this massively slows down the implementation.
 
 The number of threads is a tunable parameter.
 

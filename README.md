@@ -19,7 +19,12 @@ Links can be found for more detail on the following:
 
 ## Build instructions
 
-The project requires an anaconda environment to build. The environment.yaml file specifies an environment which can be used to build the project and run any Python script. Otherwise, I build the project using the shell scripts in /scripts.
+The project requires an anaconda environment to build. The environment.yaml file specifies an environment which can be used to build the project and run any Python script. Otherwise, I build the project using the shell scripts in /scripts:
+
+```bash
+conda activate project_environment
+(project_environment) ./scripts/release_gcc.sh
+```
 
 ## Results
 
